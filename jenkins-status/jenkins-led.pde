@@ -7,9 +7,6 @@
 #define ON  255
 #define OFF 0
 
-// BLINK ELAPSE
-#define ELAPSE 600
-
 // color - red
 void fail() {
   analogWrite(LED_PIN_R, ON);
@@ -31,12 +28,11 @@ void unstable() {
   analogWrite(LED_PIN_B, OFF);
 }
 
-// blue blink
+// color - green
 void running() {
-  analogWrite(LED_PIN_B, ON);
-  delay(ELAPSE);
+  analogWrite(LED_PIN_R, OFF);
+  analogWrite(LED_PIN_G, ON);
   analogWrite(LED_PIN_B, OFF);
-  delay(ELAPSE);
 }
 
 // off
@@ -47,7 +43,8 @@ void halt() {
 }
 
 // initialize
-void setup(){
+void setup() {
+  Serial.begin(9600);
   pinMode(LED_PIN_R, OUTPUT);
   pinMode(LED_PIN_G, OUTPUT);
   pinMode(LED_PIN_B, OUTPUT);
