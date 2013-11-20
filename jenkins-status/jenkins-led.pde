@@ -1,7 +1,7 @@
 // LED PIN
-#define LED_PIN_G 9
-#define LED_PIN_B 10
-#define LED_PIN_R 11
+#define LED_PIN_G 2
+#define LED_PIN_B 3
+#define LED_PIN_R 4
 
 // ON OFF
 #define ON  255
