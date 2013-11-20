@@ -39,6 +39,13 @@ void running() {
   delay(ELAPSE);
 }
 
+// off
+void halt() {
+  analogWrite(LED_PIN_R, OFF);
+  analogWrite(LED_PIN_G, OFF);
+  analogWrite(LED_PIN_B, OFF);
+}
+
 // initialize
 void setup(){
   pinMode(LED_PIN_R, OUTPUT);
@@ -50,14 +57,12 @@ void setup(){
 void loop() {
   if (Serial.available() > 0) {
     char c = Serial.read();
-    if (c == 'running') {
-      running();
-    } else if (c == 'unstable') {
-      unstable();
-    } else if (c == 'success')  {
-      success();
-    } else if (c == 'fail')     {
-      fail();
+    switch (c) {
+      case 'RUNNING':  running();  break;
+      case 'UNSTABLE': unstable(); break;
+      case 'SUCCESS':  success();  break;
+      case 'FAIL':     fail();     break;
+      default:         halt();     break;
     }
   }
 }
