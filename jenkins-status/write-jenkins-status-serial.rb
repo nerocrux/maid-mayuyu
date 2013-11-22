@@ -15,7 +15,7 @@ def fetch_jenkins
   results.each do |status|
     response << encode_result(status.content)
   end
-  return response.join(',')
+  return response.join('')
 end
 
 def send_to_arduino(to_be_send)
@@ -24,21 +24,21 @@ def send_to_arduino(to_be_send)
   data_bits = 8
   stop_bits = 1
   parity = SerialPort::NONE
-  #sp = SerialPort.new(port_str, baud_rate, data_bits, stop_bits, parity)
-
-  #sp.write to_be_send
+  sp = SerialPort.new(port_str, baud_rate, data_bits, stop_bits, parity)
+  puts to_be_send
+  sp.write to_be_send
 end
 
 def encode_result(code)
   case code
   when 'SUCCESS'
-    result = 101
+    result = 1
   when 'FAILURE'
-    result = 102
+    result = 2
   when 'UNSTABLE'
-    result = 103
+    result = 3
   else
-    result = 100
+    result = 0
   end
   return result
 end
@@ -47,7 +47,7 @@ def main
   if ARGV.length > 0 and ARGV[0] == 'RUN'
     send_to_arduino('r')
   else
-    to_be_send = fetch_jenkins()
+    to_be_send = 'c' + fetch_jenkins()
     send_to_arduino(to_be_send)
   end
 end

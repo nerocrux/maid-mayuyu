@@ -1,3 +1,7 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
 // LED PIN
 #define LED_PIN_G 2
 #define LED_PIN_B 3
@@ -8,9 +12,9 @@
 #define OFF           0
 
 // Job Status Code
-#define SUCCESS_CODE  101
-#define FAIL_CODE     102
-#define UNSTABLE_CODE 103
+#define SUCCESS_CODE  1
+#define FAIL_CODE     2
+#define UNSTABLE_CODE 3
 
 // LED Bar
 int ANODEPIN[10] = { 18, 13, 12, 11, 10, 9, 8, 7, 6, 5 };
@@ -110,24 +114,31 @@ int lighton(int anodepin, int r, int g, int b, int status_code) {
 }
  
 // main
+
+int status_code[10];
+int cnt = 0;
+boolean is_lighton = false;
 void loop() {
     if (Serial.available() > 0) {
-        char c[1024];
         char in_c = Serial.read();
         
         if (in_c == 'r') {
             running();
         } else {
-            int status_code[10];
-            c[1024] = in_c;
-            char *p = c;
-            char *str;
-            int cnt = 0;
-            while ((str = strtok_r(p, ",", &p)) != NULL && cnt < 10) {
-                status_code[cnt] = atoi(str);
-                cnt ++;
+            if (in_c == 'c') {
+                //clear status_code
+                cnt = 0;
+                for (int i=0; i<10; i++) {
+                    status_code[i] = 0;
+                }
+            } else {
+                //enqueue -> status_code
+                if (cnt < 10) {
+                    status_code[cnt] = (int)in_c % 48;
+                    cnt++;
+                }
             }
-
+                        
             // LED Ball
             switch (status_code[0]) {
                 case UNSTABLE_CODE: unstable(); break;
@@ -135,12 +146,11 @@ void loop() {
                 case FAIL_CODE:     fail();     break;
                 default:            halt();     break;
             }
-    
-            // LED Bar
-            for (int i = 0; i < 10; i++) {
-                printf("%d\n", status_code[i]);
-                lighton(ANODEPIN[i], CATHODEPIN[0], CATHODEPIN[1], CATHODEPIN[2], status_code[i]);
-            }
         }
+    }
+    
+    // LED Bar
+    for (int i = 0; i < cnt; i++) {
+        lighton(ANODEPIN[i], CATHODEPIN[0], CATHODEPIN[1], CATHODEPIN[2], status_code[i]);
     }
 }
