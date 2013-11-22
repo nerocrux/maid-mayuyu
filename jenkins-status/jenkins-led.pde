@@ -16,9 +16,6 @@
 int ANODEPIN[10] = { 18, 13, 12, 11, 10, 9, 8, 7, 6, 5 };
 int CATHODEPIN[3] = { 14, 16, 15 }; // R, G, B
 
-// dummy status code list for LED Bar
-int statuses[10] = {FAIL_CODE, SUCCESS_CODE, FAIL_CODE, UNSTABLE_CODE, FAIL_CODE, FAIL_CODE, SUCCESS_CODE, UNSTABLE_CODE, SUCCESS_CODE, FAIL_CODE};
-
 // color - red
 void fail() {
   analogWrite(LED_PIN_R, ON);
@@ -114,20 +111,25 @@ int lighton(int anodepin, int r, int g, int b, int status_code) {
  
 // main
 void loop() {
-  // LED Ball
   if (Serial.available() > 0) {
     char c = Serial.read();
-    switch (c) {
-      case 'RUNNING':  running();  break;
-      case 'UNSTABLE': unstable(); break;
-      case 'SUCCESS':  success();  break;
-      case 'FAIL':     fail();     break;
-      default:         halt();     break;
-    }
-  }
+    if (c == 'r') {
+        running();
+    } else {
+      int[] status_code = int(split(c, ','));
 
-  // LED Bar
-  for (int i = 0; i < 10; i++) {
-    lighton(ANODEPIN[i], CATHODEPIN[0], CATHODEPIN[1], CATHODEPIN[2], statuses[i]);
+      // LED Ball
+      switch (status_code[0]) {
+        case UNSTABLE_CODE: unstable(); break;
+        case SUCCESS_CODE:  success();  break;
+        case FAIL_CODE:     fail();     break;
+        default:            halt();     break;
+      }
+
+      // LED Bar
+      for (int i = 0; i < 10; i++) {
+        lighton(ANODEPIN[i], CATHODEPIN[0], CATHODEPIN[1], CATHODEPIN[2], status_code[i]);
+      }
+    }
   }
 }
