@@ -18,77 +18,77 @@ int CATHODEPIN[3] = { 14, 16, 15 }; // R, G, B
 
 // color - red
 void fail() {
-  analogWrite(LED_PIN_R, ON);
-  analogWrite(LED_PIN_G, OFF);
-  analogWrite(LED_PIN_B, OFF);
+    analogWrite(LED_PIN_R, ON);
+    analogWrite(LED_PIN_G, OFF);
+    analogWrite(LED_PIN_B, OFF);
 }
 
 // color - blue
 void success() {
-  analogWrite(LED_PIN_R, OFF);
-  analogWrite(LED_PIN_G, OFF);
-  analogWrite(LED_PIN_B, ON);
+    analogWrite(LED_PIN_R, OFF);
+    analogWrite(LED_PIN_G, OFF);
+    analogWrite(LED_PIN_B, ON);
 }
 
 // color - yellow
 void unstable() {
-  analogWrite(LED_PIN_R, ON);
-  analogWrite(LED_PIN_G, ON);
-  analogWrite(LED_PIN_B, OFF);
+    analogWrite(LED_PIN_R, ON);
+    analogWrite(LED_PIN_G, ON);
+    analogWrite(LED_PIN_B, OFF);
 }
 
 // color - green
 void running() {
-  analogWrite(LED_PIN_R, OFF);
-  analogWrite(LED_PIN_G, ON);
-  analogWrite(LED_PIN_B, OFF);
+    analogWrite(LED_PIN_R, OFF);
+    analogWrite(LED_PIN_G, ON);
+    analogWrite(LED_PIN_B, OFF);
 }
 
 // off
 void halt() {
-  analogWrite(LED_PIN_R, OFF);
-  analogWrite(LED_PIN_G, OFF);
-  analogWrite(LED_PIN_B, OFF);
+    analogWrite(LED_PIN_R, OFF);
+    analogWrite(LED_PIN_G, OFF);
+    analogWrite(LED_PIN_B, OFF);
 }
 
 // initialize
 void setup() {
-  // LED Ball
-  Serial.begin(9600);
-  pinMode(LED_PIN_R, OUTPUT);
-  pinMode(LED_PIN_G, OUTPUT);
-  pinMode(LED_PIN_B, OUTPUT);
-  
-  // LED Bar
-  for(int ano = 0; ano < 10; ano++) {
-    pinMode(ANODEPIN[ano], OUTPUT);
-    digitalWrite(ANODEPIN[ano], LOW);
-  }
-  for(int cat = 0; cat < 3; cat++) {
-    pinMode(CATHODEPIN[cat], OUTPUT);
-    digitalWrite(CATHODEPIN[cat], HIGH);
-  }
+    // LED Ball
+    Serial.begin(9600);
+    pinMode(LED_PIN_R, OUTPUT);
+    pinMode(LED_PIN_G, OUTPUT);
+    pinMode(LED_PIN_B, OUTPUT);
+    
+    // LED Bar
+    for(int ano = 0; ano < 10; ano++) {
+        pinMode(ANODEPIN[ano], OUTPUT);
+        digitalWrite(ANODEPIN[ano], LOW);
+    }
+    for(int cat = 0; cat < 3; cat++) {
+        pinMode(CATHODEPIN[cat], OUTPUT);
+        digitalWrite(CATHODEPIN[cat], HIGH);
+    }
 }
 
 // LED Bar light up
 int lighton(int anodepin, int r, int g, int b, int status_code) {
     double c[3];
     if (status_code == SUCCESS_CODE) {
-      c[0] = 0.0;
-      c[1] = 0.0;
-      c[2] = 1.0;  // blue
+        c[0] = 0.0;
+        c[1] = 0.0;
+        c[2] = 1.0;  // blue
     } else if (status_code == FAIL_CODE) {
-      c[0] = 1.0;
-      c[1] = 0.0;
-      c[2] = 0.0;  // red
+        c[0] = 1.0;
+        c[1] = 0.0;
+        c[2] = 0.0;  // red
     } else if (status_code == UNSTABLE_CODE) {
-      c[0] = 1.0;
-      c[1] = 1.0;
-      c[2] = 0.0;  // yellow
+        c[0] = 1.0;
+        c[1] = 1.0;
+        c[2] = 0.0;  // yellow
     } else {
-      c[0] = 0.0;
-      c[1] = 0.0;
-      c[2] = 0.0;  // no color
+        c[0] = 0.0;
+        c[1] = 0.0;
+        c[2] = 0.0;  // no color
     }
   
     int iR4 = (int)(c[0] * 4.0 + 0.5);
@@ -111,25 +111,36 @@ int lighton(int anodepin, int r, int g, int b, int status_code) {
  
 // main
 void loop() {
-  if (Serial.available() > 0) {
-    char c = Serial.read();
-    if (c == 'r') {
-        running();
-    } else {
-      int[] status_code = int(split(c, ','));
+    if (Serial.available() > 0) {
+        char c[1024];
+        char in_c = Serial.read();
+        
+        if (in_c == 'r') {
+            running();
+        } else {
+            int status_code[10];
+            c[1024] = in_c;
+            char *p = c;
+            char *str;
+            int cnt = 0;
+            while ((str = strtok_r(p, ",", &p)) != NULL && cnt < 10) {
+                status_code[cnt] = atoi(str);
+                cnt ++;
+            }
 
-      // LED Ball
-      switch (status_code[0]) {
-        case UNSTABLE_CODE: unstable(); break;
-        case SUCCESS_CODE:  success();  break;
-        case FAIL_CODE:     fail();     break;
-        default:            halt();     break;
-      }
-
-      // LED Bar
-      for (int i = 0; i < 10; i++) {
-        lighton(ANODEPIN[i], CATHODEPIN[0], CATHODEPIN[1], CATHODEPIN[2], status_code[i]);
-      }
+            // LED Ball
+            switch (status_code[0]) {
+                case UNSTABLE_CODE: unstable(); break;
+                case SUCCESS_CODE:  success();  break;
+                case FAIL_CODE:     fail();     break;
+                default:            halt();     break;
+            }
+    
+            // LED Bar
+            for (int i = 0; i < 10; i++) {
+                printf("%d\n", status_code[i]);
+                lighton(ANODEPIN[i], CATHODEPIN[0], CATHODEPIN[1], CATHODEPIN[2], status_code[i]);
+            }
+        }
     }
-  }
 }
