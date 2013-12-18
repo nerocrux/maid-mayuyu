@@ -48,7 +48,7 @@ def main
     send_to_arduino('r')
   else
     to_be_send = 'c' + fetch_jenkins()
-    send_to_arduino(to_be_send)
+    send_to_arduino(to_be_send[0...11])
   end
 end
 
